@@ -5,6 +5,8 @@
 
 #include "tp_utils/StringID.h"
 
+#include "json.hpp"
+
 #include <functional>
 #include <unordered_map>
 
@@ -46,11 +48,11 @@ class TP_CONTROL_SHARED_EXPORT CoreInterfaceHandle
   tp_utils::StringID m_nameID;
 
   //################################################################################################
-  CoreInterfaceHandle(tp_utils::StringID typeID_, tp_utils::StringID nameID_);
+  CoreInterfaceHandle(const tp_utils::StringID& typeID_, const tp_utils::StringID& nameID_);
 
 public:
   //################################################################################################
-  CoreInterfaceHandle();
+  CoreInterfaceHandle()=default;
 
   //################################################################################################
   CoreInterfaceHandle(const CoreInterfaceHandle& other)=default;
@@ -77,7 +79,13 @@ public:
   This returns the data that this channel holds, or an inalid variant if there was a problem.
   \return The data for the channel.
   */
-  CoreInterfaceData* data() const;
+  CoreInterfaceData* data() const;  
+
+  //################################################################################################
+  nlohmann::json saveState() const;
+
+  //################################################################################################
+  void loadState(const nlohmann::json& j, CoreInterface* coreInterface);
 };
 
 //##################################################################################################

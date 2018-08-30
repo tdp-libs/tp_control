@@ -1,11 +1,17 @@
 #include "tp_control/CoreInterface.h"
 
+#include "tp_utils/JSONUtils.h"
+
 namespace tp_control
 {
 //##################################################################################################
 struct CoreInterfacePayloadPrivate
 {
+  TP_NONCOPYABLE(CoreInterfacePayloadPrivate);
+
   CoreInterfaceData* data{nullptr};
+
+  CoreInterfacePayloadPrivate()=default;
 
   ~CoreInterfacePayloadPrivate()
   {
@@ -14,16 +20,10 @@ struct CoreInterfacePayloadPrivate
 };
 
 //##################################################################################################
-CoreInterfaceHandle::CoreInterfaceHandle(tp_utils::StringID typeID, tp_utils::StringID nameID):
-  m_typeID(std::move(typeID)),
-  m_nameID(std::move(nameID))
+CoreInterfaceHandle::CoreInterfaceHandle(const tp_utils::StringID& typeID, const tp_utils::StringID& nameID):
+  m_typeID(typeID),
+  m_nameID(nameID)
 {
-}
-
-//##################################################################################################
-CoreInterfaceHandle::CoreInterfaceHandle()
-{
-
 }
 
 //##################################################################################################
@@ -51,6 +51,21 @@ CoreInterfaceData* CoreInterfaceHandle::data() const
 }
 
 //##################################################################################################
+nlohmann::json CoreInterfaceHandle::saveState() const
+{
+  nlohmann::json j;
+  j["typeID"] = m_typeID.keyString();
+  j["nameID"] = m_nameID.keyString();
+  return j;
+}
+
+//##################################################################################################
+void CoreInterfaceHandle::loadState(const nlohmann::json& j, CoreInterface* coreInterface)
+{
+  (*this) = coreInterface->handle(TPJSONString(j, "typeID"), TPJSONString(j, "nameID"));
+}
+
+//##################################################################################################
 bool lessThanCoreInterfaceHandle(const CoreInterfaceHandle& lhs, const CoreInterfaceHandle& rhs)
 {
   return lhs.nameID().keyString() < rhs.nameID().keyString();
@@ -59,11 +74,15 @@ bool lessThanCoreInterfaceHandle(const CoreInterfaceHandle& lhs, const CoreInter
 //##################################################################################################
 struct CoreInterface::Private
 {
+  TP_NONCOPYABLE(Private);
+
   std::unordered_map<tp_utils::StringID, std::unordered_map<tp_utils::StringID, CoreInterfaceHandle>> channels;
 
   std::vector<const ChannelChangedCallback*> channelChangeCallbacks;
   std::vector<const ChannelListChangedCallback*> channelListChangedCallbacks;
   std::unordered_map<tp_utils::StringID, std::vector<const SignalCallback*>> signalCallbacks;
+
+  Private()=default;
 
   ~Private()
   {
@@ -146,8 +165,7 @@ void CoreInterface::setChannelData(const CoreInterfaceHandle& handle, CoreInterf
     return;
   }
 
-  if(handle.m_payload->data)
-    delete handle.m_payload->data;
+  delete handle.m_payload->data;
 
   handle.m_payload->data = data;
 
