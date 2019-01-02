@@ -146,7 +146,7 @@ public:
   This will return all of the channels that have been defined or set.
   \return All of the channels.
   */
-  std::unordered_map<tp_utils::StringID, std::unordered_map<tp_utils::StringID, CoreInterfaceHandle>> channels()const;
+  const std::unordered_map<tp_utils::StringID, std::unordered_map<tp_utils::StringID, CoreInterfaceHandle>>& channels()const;
 
   //################################################################################################
   //! Register a channel list changed callback

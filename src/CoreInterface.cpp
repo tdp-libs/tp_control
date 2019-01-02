@@ -106,7 +106,7 @@ CoreInterface::~CoreInterface()
 }
 
 //##################################################################################################
-std::unordered_map<tp_utils::StringID, std::unordered_map<tp_utils::StringID, CoreInterfaceHandle>> CoreInterface::channels()const
+const std::unordered_map<tp_utils::StringID, std::unordered_map<tp_utils::StringID, CoreInterfaceHandle>>& CoreInterface::channels()const
 {
   return d->channels;
 }
