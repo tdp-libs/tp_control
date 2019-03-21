@@ -2,6 +2,9 @@
 
 #include "tp_utils/JSONUtils.h"
 
+#include <thread>
+#include <cassert>
+
 namespace tp_control
 {
 //##################################################################################################
@@ -76,6 +79,8 @@ struct CoreInterface::Private
 {
   TP_NONCOPYABLE(Private);
 
+  std::thread::id ownerThread{std::this_thread::get_id()};
+
   std::unordered_map<tp_utils::StringID, std::unordered_map<tp_utils::StringID, CoreInterfaceHandle>> channels;
 
   std::vector<const ChannelChangedCallback*> channelChangeCallbacks;
@@ -84,11 +89,18 @@ struct CoreInterface::Private
 
   Private()=default;
 
+  //################################################################################################
   ~Private()
   {
     for(const auto& i : channels)
       for(const auto& j : i.second)
         delete j.second.m_payload;
+  }
+
+  //################################################################################################
+  void checkThread()
+  {
+    assert(ownerThread==std::this_thread::get_id());
   }
 };
 
@@ -102,30 +114,35 @@ CoreInterface::CoreInterface():
 //##################################################################################################
 CoreInterface::~CoreInterface()
 {
+  d->checkThread();
   delete d;
 }
 
 //##################################################################################################
 const std::unordered_map<tp_utils::StringID, std::unordered_map<tp_utils::StringID, CoreInterfaceHandle>>& CoreInterface::channels()const
 {
+  d->checkThread();
   return d->channels;
 }
 
 //##################################################################################################
 void CoreInterface::registerCallback(const ChannelListChangedCallback* callback)
 {
+  d->checkThread();
   d->channelListChangedCallbacks.push_back(callback);
 }
 
 //##################################################################################################
 void CoreInterface::unregisterCallback(const ChannelListChangedCallback* callback)
 {
+  d->checkThread();
   tpRemoveOne(d->channelListChangedCallbacks, callback);
 }
 
 //##################################################################################################
 CoreInterfaceHandle CoreInterface::handle(const tp_utils::StringID& typeID, const tp_utils::StringID& nameID)
 {
+  d->checkThread();
   if(!typeID.isValid() || !nameID.isValid())
     return CoreInterfaceHandle();
 
@@ -147,18 +164,21 @@ CoreInterfaceHandle CoreInterface::handle(const tp_utils::StringID& typeID, cons
 //##################################################################################################
 void CoreInterface::registerCallback(const ChannelChangedCallback* callback)
 {
+  d->checkThread();
   d->channelChangeCallbacks.push_back(callback);
 }
 
 //##################################################################################################
 void CoreInterface::unregisterCallback(const ChannelChangedCallback* callback)
 {
+  d->checkThread();
   tpRemoveOne(d->channelChangeCallbacks, callback);
 }
 
 //##################################################################################################
 void CoreInterface::setChannelData(const CoreInterfaceHandle& handle, CoreInterfaceData* data)
 {
+  d->checkThread();
   if(!handle.m_payload)
   {
     delete data;
@@ -176,12 +196,14 @@ void CoreInterface::setChannelData(const CoreInterfaceHandle& handle, CoreInterf
 //##################################################################################################
 void CoreInterface::registerCallback(const SignalCallback* callback, const tp_utils::StringID& typeID)
 {
+  d->checkThread();
   d->signalCallbacks[typeID].push_back(callback);
 }
 
 //##################################################################################################
 void CoreInterface::unregisterCallback(const SignalCallback* callback, const tp_utils::StringID& typeID)
 {
+  d->checkThread();
   auto& callbacks = d->signalCallbacks[typeID];
   tpRemoveOne(callbacks, callback);
   if(callbacks.empty())
@@ -191,6 +213,7 @@ void CoreInterface::unregisterCallback(const SignalCallback* callback, const tp_
 //##################################################################################################
 void CoreInterface::sendSignal(const tp_utils::StringID& typeID, CoreInterfaceData* data)
 {
+  d->checkThread();
   for(const auto& c : d->signalCallbacks[typeID])
     (*c)(typeID, data);
 }

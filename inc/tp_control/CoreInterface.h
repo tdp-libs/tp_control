@@ -205,7 +205,7 @@ public:
   //################################################################################################
   //! Set the alue held by a channel
   /*!
-  This will set the alue of a channel and cause the channel changed callbacks to be called.
+  This will set the value of a channel and cause the channel changed callbacks to be called.
 
   \param handle - The handle of the channel that you want to set.
   \param data - The new value for that channel, this will take ownership.
