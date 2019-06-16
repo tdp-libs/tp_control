@@ -23,9 +23,9 @@ struct CoreInterfacePayloadPrivate
 };
 
 //##################################################################################################
-CoreInterfaceHandle::CoreInterfaceHandle(const tp_utils::StringID& typeID, const tp_utils::StringID& nameID):
-  m_typeID(typeID),
-  m_nameID(nameID)
+CoreInterfaceHandle::CoreInterfaceHandle(tp_utils::StringID typeID, tp_utils::StringID nameID):
+  m_typeID(std::move(typeID)),
+  m_nameID(std::move(nameID))
 {
 }
 

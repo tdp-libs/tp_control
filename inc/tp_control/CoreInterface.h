@@ -48,7 +48,7 @@ class TP_CONTROL_SHARED_EXPORT CoreInterfaceHandle
   tp_utils::StringID m_nameID;
 
   //################################################################################################
-  CoreInterfaceHandle(const tp_utils::StringID& typeID_, const tp_utils::StringID& nameID_);
+  CoreInterfaceHandle(tp_utils::StringID typeID_, tp_utils::StringID nameID_);
 
 public:
   //################################################################################################
@@ -56,6 +56,12 @@ public:
 
   //################################################################################################
   CoreInterfaceHandle(const CoreInterfaceHandle& other)=default;
+
+  //################################################################################################
+  CoreInterfaceHandle(CoreInterfaceHandle&& other)=default;
+
+  //################################################################################################
+  CoreInterfaceHandle& operator=(const CoreInterfaceHandle& other)=default;
 
   //################################################################################################
   const tp_utils::StringID& typeID() const;
