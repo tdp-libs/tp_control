@@ -57,8 +57,8 @@ CoreInterfaceData* CoreInterfaceHandle::data() const
 nlohmann::json CoreInterfaceHandle::saveState() const
 {
   nlohmann::json j;
-  j["typeID"] = m_typeID.keyString();
-  j["nameID"] = m_nameID.keyString();
+  j["typeID"] = m_typeID.toString();
+  j["nameID"] = m_nameID.toString();
   return j;
 }
 
@@ -71,7 +71,7 @@ void CoreInterfaceHandle::loadState(const nlohmann::json& j, CoreInterface* core
 //##################################################################################################
 bool lessThanCoreInterfaceHandle(const CoreInterfaceHandle& lhs, const CoreInterfaceHandle& rhs)
 {
-  return lhs.nameID().keyString() < rhs.nameID().keyString();
+  return lhs.nameID().toString() < rhs.nameID().toString();
 }
 
 //##################################################################################################
