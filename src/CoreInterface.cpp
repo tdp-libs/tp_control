@@ -83,8 +83,6 @@ struct CoreInterface::Private
 
   std::unordered_map<tp_utils::StringID, std::unordered_map<tp_utils::StringID, CoreInterfaceHandle>> channels;
 
-  std::vector<const ChannelChangedCallback*> channelChangeCallbacks;
-  std::vector<const ChannelListChangedCallback*> channelListChangedCallbacks;
   std::unordered_map<tp_utils::StringID, std::vector<const SignalCallback*>> signalCallbacks;
 
   Private()=default;
@@ -126,20 +124,6 @@ const std::unordered_map<tp_utils::StringID, std::unordered_map<tp_utils::String
 }
 
 //##################################################################################################
-void CoreInterface::registerCallback(const ChannelListChangedCallback* callback)
-{
-  d->checkThread();
-  d->channelListChangedCallbacks.push_back(callback);
-}
-
-//##################################################################################################
-void CoreInterface::unregisterCallback(const ChannelListChangedCallback* callback)
-{
-  d->checkThread();
-  tpRemoveOne(d->channelListChangedCallbacks, callback);
-}
-
-//##################################################################################################
 CoreInterfaceHandle CoreInterface::handle(const tp_utils::StringID& typeID, const tp_utils::StringID& nameID)
 {
   d->checkThread();
@@ -154,25 +138,10 @@ CoreInterfaceHandle CoreInterface::handle(const tp_utils::StringID& typeID, cons
     localHandle.m_typeID = typeID;
     localHandle.m_nameID = nameID;
 
-    for(const auto& c : d->channelListChangedCallbacks)
-      (*c)();
+    channelListChanged();
   }
 
   return localHandle;
-}
-
-//##################################################################################################
-void CoreInterface::registerCallback(const ChannelChangedCallback* callback)
-{
-  d->checkThread();
-  d->channelChangeCallbacks.push_back(callback);
-}
-
-//##################################################################################################
-void CoreInterface::unregisterCallback(const ChannelChangedCallback* callback)
-{
-  d->checkThread();
-  tpRemoveOne(d->channelChangeCallbacks, callback);
 }
 
 //##################################################################################################
@@ -189,8 +158,7 @@ void CoreInterface::setChannelData(const CoreInterfaceHandle& handle, CoreInterf
 
   handle.m_payload->data = data;
 
-  for(const auto& c : d->channelChangeCallbacks)
-    (*c)(handle.m_typeID, handle.m_nameID, handle.m_payload->data);
+  channelChanged(handle.m_typeID, handle.m_nameID, handle.m_payload->data);
 }
 
 //##################################################################################################

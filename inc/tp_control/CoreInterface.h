@@ -3,6 +3,7 @@
 
 #include "tp_control/Globals.h"
 
+#include "tp_utils/CallbackCollection.h"
 #include "tp_utils/StringID.h"
 
 #include "json.hpp"
@@ -16,14 +17,6 @@ namespace tp_control
 class CoreInterface;
 class CoreInterfaceData;
 struct CoreInterfacePayloadPrivate;
-
-//##################################################################################################
-//! The callback for changes in the list of channels.
-typedef std::function<void()> ChannelListChangedCallback;
-
-//##################################################################################################
-//! The callback for changes to channel data.
-typedef std::function<void(const tp_utils::StringID& typeID, const tp_utils::StringID& nameID, const CoreInterfaceData* data)> ChannelChangedCallback;
 
 //##################################################################################################
 //! The callback for signals.
@@ -82,7 +75,7 @@ public:
   //################################################################################################
   //! Returns the channel data
   /*!
-  This returns the data that this channel holds, or an inalid variant if there was a problem.
+  This returns the data that this channel holds, or nullptr if there was a problem.
   \return The data for the channel.
   */
   CoreInterfaceData* data() const;  
@@ -155,22 +148,7 @@ public:
   const std::unordered_map<tp_utils::StringID, std::unordered_map<tp_utils::StringID, CoreInterfaceHandle>>& channels()const;
 
   //################################################################################################
-  //! Register a channel list changed callback
-  /*!
-  Callbacks registered with this function will be called when the list of channels changes.
-
-  \param callback - A pointer to the function that should be called.
-  \param opaque - This will be passed into the callback.
-  */
-  void registerCallback(const ChannelListChangedCallback* callback);
-
-  //################################################################################################
-  //! Unregister a channel list changed callback
-  /*!
-  \param callback - A pointer to the callback function.
-  \param opaque - This should be the same as the opaque passed into registerCallback().
-  */
-  void unregisterCallback(const ChannelListChangedCallback* callback);
+  tp_utils::CallbackCollection<void()> channelListChanged;
 
   //################################################################################################
   //! Get a handle for a channel
@@ -184,29 +162,9 @@ public:
   CoreInterfaceHandle handle(const tp_utils::StringID& typeID, const tp_utils::StringID& nameID);
 
   //################################################################################################
-  //! Register a callback that will be called when a channel changes
-  /*!
-  Each time a channel is modified all callbacks that have been registered via this method will be
-  called. The opaque pointer can be used to identify what instance of your class should be receiving
-  the callback.
-
-  You should unregister callbacks when you destroy your class or when you no longer need to receive
-  notifications of changes.
-
-  \param callback - A pointer to the function that you want to be called.
-  \param opaque - A pointer that will be passed into the callback.
-
-  \sa unregisterCallback()
-  */
-  void registerCallback(const ChannelChangedCallback* callback);
-
-  //################################################################################################
-  //! Unregister a channel changed callback
-  /*!
-  \param callback - A pointer to the callback.
-  \param opaque - Should be the same as the opaque passed into registerCallback().
-  */
-  void unregisterCallback(const ChannelChangedCallback* callback);
+  tp_utils::CallbackCollection<void(const tp_utils::StringID& typeID,
+                                    const tp_utils::StringID& nameID,
+                                    const CoreInterfaceData* data)> channelChanged;
 
   //################################################################################################
   //! Set the alue held by a channel
