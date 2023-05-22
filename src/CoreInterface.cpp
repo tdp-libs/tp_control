@@ -1,6 +1,7 @@
 #include "tp_control/CoreInterface.h"
 
 #include "tp_utils/JSONUtils.h"
+#include "tp_utils/DebugUtils.h"
 
 #include <thread>
 #include <cassert>
@@ -131,7 +132,6 @@ CoreInterfaceHandle CoreInterface::handle(const tp_utils::StringID& typeID, cons
     return CoreInterfaceHandle();
 
   CoreInterfaceHandle& localHandle = d->channels[typeID][nameID];
-
   if(!localHandle.m_payload)
   {
     localHandle.m_payload = new CoreInterfacePayloadPrivate;
