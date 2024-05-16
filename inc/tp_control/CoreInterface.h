@@ -81,7 +81,7 @@ public:
   CoreInterfaceData* data() const;  
 
   //################################################################################################
-  nlohmann::json saveState() const;
+  void saveState(nlohmann::json& j) const;
 
   //################################################################################################
   void loadState(const nlohmann::json& j, CoreInterface* coreInterface);

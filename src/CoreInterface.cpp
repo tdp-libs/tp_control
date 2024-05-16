@@ -1,7 +1,6 @@
 #include "tp_control/CoreInterface.h"
 
 #include "tp_utils/JSONUtils.h"
-#include "tp_utils/DebugUtils.h"
 
 #include <thread>
 #include <cassert>
@@ -55,12 +54,10 @@ CoreInterfaceData* CoreInterfaceHandle::data() const
 }
 
 //##################################################################################################
-nlohmann::json CoreInterfaceHandle::saveState() const
+void CoreInterfaceHandle::saveState(nlohmann::json& j) const
 {
-  nlohmann::json j;
   j["typeID"] = m_typeID.toString();
   j["nameID"] = m_nameID.toString();
-  return j;
 }
 
 //##################################################################################################
