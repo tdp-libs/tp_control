@@ -81,7 +81,7 @@ public:
   CoreInterfaceData* data() const;  
 
   //################################################################################################
-  nlohmann::json saveState() const;
+  void saveState(nlohmann::json& j) const;
 
   //################################################################################################
   void loadState(const nlohmann::json& j, CoreInterface* coreInterface);
@@ -127,6 +127,7 @@ The following widgets can be used to interact with core interfaces:
 */
 class TP_CONTROL_SHARED_EXPORT CoreInterface
 {
+  TP_DQ;
 public:
   //################################################################################################
   CoreInterface();
@@ -213,11 +214,6 @@ public:
   \param data The payload of the signal or nullptr, this will take ownership.
   */
   void sendSignal(const tp_utils::StringID& typeID, CoreInterfaceData* data);
-
-private:
-  struct Private;
-  friend struct Private;
-  Private* d;
 };
 
 }
