@@ -30,6 +30,18 @@ CoreInterfaceHandle::CoreInterfaceHandle(tp_utils::StringID typeID, tp_utils::St
 }
 
 //##################################################################################################
+bool CoreInterfaceHandle::is(const tp_utils::StringID& typeID, const tp_utils::StringID& nameID) const
+{
+  return m_typeID==typeID && m_nameID==nameID;
+}
+
+//##################################################################################################
+bool CoreInterfaceHandle::isValid() const
+{
+  return m_typeID.isValid() && m_nameID.isValid();
+}
+
+//##################################################################################################
 const tp_utils::StringID& CoreInterfaceHandle::typeID() const
 {
   return m_typeID;
@@ -80,8 +92,6 @@ struct CoreInterface::Private
   std::thread::id ownerThread{std::this_thread::get_id()};
 
   std::unordered_map<tp_utils::StringID, std::unordered_map<tp_utils::StringID, CoreInterfaceHandle>> channels;
-
-  std::unordered_map<tp_utils::StringID, std::vector<const SignalCallback*>> signalCallbacks;
 
   Private()=default;
 
@@ -159,28 +169,10 @@ void CoreInterface::setChannelData(const CoreInterfaceHandle& handle, CoreInterf
 }
 
 //##################################################################################################
-void CoreInterface::registerCallback(const SignalCallback* callback, const tp_utils::StringID& typeID)
-{
-  d->checkThread();
-  d->signalCallbacks[typeID].push_back(callback);
-}
-
-//##################################################################################################
-void CoreInterface::unregisterCallback(const SignalCallback* callback, const tp_utils::StringID& typeID)
-{
-  d->checkThread();
-  auto& callbacks = d->signalCallbacks[typeID];
-  tpRemoveOne(callbacks, callback);
-  if(callbacks.empty())
-    d->signalCallbacks.erase(typeID);
-}
-
-//##################################################################################################
 void CoreInterface::sendSignal(const tp_utils::StringID& typeID, CoreInterfaceData* data)
 {
   d->checkThread();
-  for(const auto& c : d->signalCallbacks[typeID])
-    (*c)(typeID, data);
+  signalFired(typeID, data);
 }
 
 }

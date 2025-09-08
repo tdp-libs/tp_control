@@ -1,10 +1,10 @@
-#ifndef tp_control_CoreInterface_h
-#define tp_control_CoreInterface_h
+#pragma once
 
 #include "tp_control/Globals.h"
 
 #include "tp_utils/CallbackCollection.h"
 #include "tp_utils/StringID.h"
+#include "tp_utils/CallbackCollection.h"
 
 #include "json.hpp"
 
@@ -17,10 +17,6 @@ namespace tp_control
 class CoreInterface;
 class CoreInterfaceData;
 struct CoreInterfacePayloadPrivate;
-
-//##################################################################################################
-//! The callback for signals.
-typedef std::function<void(const tp_utils::StringID& typeID, const CoreInterfaceData* data)> SignalCallback;
 
 //##################################################################################################
 //! The payload for signals and channels
@@ -55,6 +51,12 @@ public:
 
   //################################################################################################
   CoreInterfaceHandle& operator=(const CoreInterfaceHandle& other)=default;
+
+  //################################################################################################
+  bool is(const tp_utils::StringID& typeID, const tp_utils::StringID& nameID) const;
+
+  //################################################################################################
+  bool isValid() const;
 
   //################################################################################################
   const tp_utils::StringID& typeID() const;
@@ -182,27 +184,9 @@ public:
   //## Signals #####################################################################################
   //################################################################################################
 
-  //################################################################################################
-  //! Register a callback for a signal
-  /*!
-  If you register a callback you should unregister it when you are done by calling
-  unregisterCallback()
-
-  \sa sendSignal()
-  \sa unregisterCallback()
-
-  \param callback - The function pointer that will be called when a signal is sent.
-  \param typeID - The type of signal that you are interested in.
- */
-  void registerCallback(const SignalCallback* callback, const tp_utils::StringID& typeID);
 
   //################################################################################################
-  //! Unregister a signal callback
-  /*!
-  \param callback - A pointer to the callback function.
-  \param typeID - The type that you want to unregister from.
-  */
-  void unregisterCallback(const SignalCallback* callback, const tp_utils::StringID& typeID);
+  tp_utils::CallbackCollection<void(const tp_utils::StringID& typeID, const CoreInterfaceData* data)> signalFired;
 
   //################################################################################################
   //! Send a signal
@@ -217,5 +201,3 @@ public:
 };
 
 }
-
-#endif
